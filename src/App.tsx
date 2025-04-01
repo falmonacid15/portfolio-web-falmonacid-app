@@ -1,7 +1,12 @@
+import AppProvider from "./context/AppProvider";
+import AppRouter from "./routes/AppRouter";
+
 function App() {
   return (
     <>
-      <h1>Portfolio web f almonacid - app</h1>
+      <AppProvider>
+        <AppRouter />
+      </AppProvider>
     </>
   );
 }
