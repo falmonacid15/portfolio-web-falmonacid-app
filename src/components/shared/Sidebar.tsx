@@ -28,7 +28,7 @@ interface NavSection {
   items: NavItem[];
 }
 
-const navItemsSidebar: NavSection[] = [
+export const navItemsSidebar: NavSection[] = [
   {
     section: "Administrador",
     items: [
