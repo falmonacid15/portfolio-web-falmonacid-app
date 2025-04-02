@@ -10,7 +10,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
-import AppIcon from "../icons/AppIcon";
+import AppIcon from "../../icons/AppIcon";
 
 interface SidebarProps {
   isExpanded: boolean;

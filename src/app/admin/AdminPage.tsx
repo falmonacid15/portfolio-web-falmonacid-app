@@ -1,4 +1,4 @@
-import HeaderPage from "../../components/shared/HeaderPage";
+import HeaderPage from "../../components/shared/layout/HeaderPage";
 
 export default function AdminPage() {
   return (

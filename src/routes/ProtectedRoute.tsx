@@ -4,7 +4,13 @@ import { useAuth } from "../context/AuthProvider";
 const ProtectedRoute = () => {
   const { isAuthenticated } = useAuth();
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Otherwise, render the protected content
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

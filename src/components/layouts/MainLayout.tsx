@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "../shared/Navbar";
+import Navbar from "../shared/layout/Navbar";
 import { useState } from "react";
-import { MobileSidebar, Sidebar } from "../shared/Sidebar";
+import { MobileSidebar, Sidebar } from "../shared/layout/Sidebar";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

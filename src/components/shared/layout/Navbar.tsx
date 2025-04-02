@@ -5,11 +5,11 @@ import {
   NavbarBrand,
   Button,
 } from "@heroui/react";
-import { ThemeSwitcher } from "./ThemeSwitcher";
+import { ThemeSwitcher } from "../ThemeSwitcher";
 import { Link } from "react-router-dom";
-import AppIcon from "../icons/AppIcon";
+import AppIcon from "../../icons/AppIcon";
 import { Icon } from "@iconify/react";
-import ProfileDropdown from "./ProfileDropdown";
+import ProfileDropdown from "../ProfileDropdown";
 
 interface NavbarProps {
   onMenuClick?: () => void;
