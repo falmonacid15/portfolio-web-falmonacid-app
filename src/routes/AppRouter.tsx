@@ -10,6 +10,8 @@ import LoginPage from "../app/auth/login/LoginPage";
 import AdminPage from "../app/admin/AdminPage";
 import ContactFormPage from "../app/contact-forms/ContactFormPage";
 import { useAuth } from "../context/AuthProvider";
+import HomePage from "../app/home/HomePage";
+import PreviewPage from "../app/preview/PreviewPage";
 
 const RedirectIfAuthenticated = () => {
   const { isAuthenticated } = useAuth();
@@ -24,6 +26,8 @@ const AppRouter = () => (
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/contact-forms" element={<ContactFormPage />} />
+          <Route path="/admin/home" element={<HomePage />} />
+          <Route path="/admin/preview" element={<PreviewPage />} />
         </Route>
       </Route>
       <Route path="/" element={<Navigate to="/admin" replace />} />

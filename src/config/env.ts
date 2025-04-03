@@ -5,6 +5,7 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().min(1, "Cloudinary API key is required"),
   CLOUDINARY_API_SECRET: z.string().min(1, "Cloudinary API secret is required"),
   API_BASE_URL: z.string().min(1, "API base URL is required"),
+  GITHUB_PERSONAL_TOKEN: z.string().min(1, "GitHub personal token is required"),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
@@ -15,6 +16,7 @@ function validateEnv(): EnvConfig {
     CLOUDINARY_API_KEY: import.meta.env.VITE_CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: import.meta.env.VITE_CLOUDINARY_API_SECRET,
     API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    GITHUB_PERSONAL_TOKEN: import.meta.env.VITE_GITHUB_PERSONAL_TOKEN,
   };
 
   try {
@@ -42,3 +44,5 @@ export const getCloudinaryConfig = () => ({
 });
 
 export const getApiBaseUrl = () => env.API_BASE_URL;
+
+export const getGithubPersonalToken = () => env.GITHUB_PERSONAL_TOKEN;

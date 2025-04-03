@@ -190,12 +190,33 @@ export function DataTable<T extends BaseRow>({
         </Chip>
       );
     }
-    if (columnKey === "description") {
+    if (columnKey === "description" || columnKey === "shortDescription") {
       return (
-        <h2 className="text-sm text-foreground/80">
-          {formatValue(item.description).substring(0, 100)}
-          {formatValue(item.description).length > 100 ? "..." : ""}
-        </h2>
+        <p className="text-sm text-foreground/80 line-clamp-2">
+          {formatValue(item.description || item.shortDescription)}
+        </p>
+      );
+    }
+    if (columnKey === "hasDemo") {
+      return (
+        <Chip
+          color={item.hasDemo ? "success" : "danger"}
+          className="flex items-center gap-2"
+          size="sm"
+        >
+          {item.hasDemo ? "Si tiene" : "No tiene"}
+        </Chip>
+      );
+    }
+    if (columnKey === "hasRepo") {
+      return (
+        <Chip
+          color={item.hasRepo ? "success" : "danger"}
+          className="flex items-center gap-2"
+          size="sm"
+        >
+          {item.hasDemo ? "Si tiene" : "No tiene"}
+        </Chip>
       );
     }
     if (typeof columnKey === "string" && columnKey.includes(".")) {

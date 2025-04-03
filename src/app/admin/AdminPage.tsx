@@ -1,3 +1,5 @@
+import GitHubCommits from "../../components/pages/admin/GitHubCommits";
+import StatsCards from "../../components/pages/admin/StatsCards";
 import HeaderPage from "../../components/shared/layout/HeaderPage";
 
 export default function AdminPage() {
@@ -7,6 +9,10 @@ export default function AdminPage() {
         title="Panel de administracion"
         description="Controla desde aqui todo el contenido de tu portafolio."
       />
+      <StatsCards />
+      <div className="mt-6 px-8">
+        <GitHubCommits />
+      </div>
     </div>
   );
 }

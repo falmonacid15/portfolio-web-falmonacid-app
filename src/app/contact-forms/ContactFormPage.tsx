@@ -36,6 +36,8 @@ export default function ContactFormPage() {
         <DataTable<Omit<FormContact, "">>
           columns={contactFormsColumns}
           rows={[]}
+          onView={() => {}}
+          searchable
         />
       </div>
     </div>
