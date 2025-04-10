@@ -4,6 +4,7 @@ export interface AboutMe {
   id: string;
   title: string;
   descriptions: string[];
+  image: string;
   skillsTitle: string;
   skillsSubtitle: string;
   skillCategories: SkillCategory[];

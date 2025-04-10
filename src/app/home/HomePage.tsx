@@ -63,34 +63,38 @@ export default function HomePage() {
   });
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       <HeaderPage
         title="Pagina Inicio"
         description="Controla desde aqui todo el contenido de la pagina de inicio de tu portafolio."
       />
       <HomePageForm />
-      <div className="flex w-full px-16 items-start space-x-8 mt-8">
+      <div className="flex flex-col sm:flex-row w-full px-4 sm:px-16 mt-8 space-y-8 space-x-0 sm:space-y-0 sm:space-x-8">
         <div className="flex flex-col w-full space-y-4">
-          <h2 className="text-lg">Experiencias laborales</h2>
-          <DataTable
-            columns={workExperiencesColumns}
-            rows={workExperiences || []}
-            actionButton={() => {}}
-            onView={() => {}}
-            actionButtonLabel="Ir a experiencias laborales"
-            actionButtonIcon="lucide:briefcase"
-          />
+          <h2 className="text-lg font-medium">Experiencias laborales</h2>
+          <div className="overflow-x-auto">
+            <DataTable
+              columns={workExperiencesColumns}
+              rows={workExperiences || []}
+              actionButton={() => {}}
+              onView={() => {}}
+              actionButtonLabel="Ir a experiencias laborales"
+              actionButtonIcon="lucide:briefcase"
+            />
+          </div>
         </div>
         <div className="flex flex-col w-full space-y-4">
-          <h2 className="text-lg">Proyectos</h2>
-          <DataTable
-            columns={projectsColumns}
-            rows={projects || []}
-            actionButton={() => {}}
-            onView={() => {}}
-            actionButtonLabel="Ir a proyectos"
-            actionButtonIcon="lucide:folder"
-          />
+          <h2 className="text-lg font-medium">Proyectos</h2>
+          <div className="overflow-x-auto">
+            <DataTable
+              columns={projectsColumns}
+              rows={projects || []}
+              actionButton={() => {}}
+              onView={() => {}}
+              actionButtonLabel="Ir a proyectos"
+              actionButtonIcon="lucide:folder"
+            />
+          </div>
         </div>
       </div>
     </div>

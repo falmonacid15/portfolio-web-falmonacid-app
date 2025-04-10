@@ -54,22 +54,22 @@ export const navItemsSidebar: NavSection[] = [
     items: [
       {
         icon: "lucide:home",
-        label: "Pagina inicio",
+        label: "Inicio",
         href: "/admin/home",
       },
       {
         icon: "lucide:user",
-        label: "Pagina sobre mi",
+        label: "Sobre mi",
         href: "/admin/aboutme",
       },
       {
         icon: "lucide:briefcase",
-        label: "Pagina portafolio proyectos",
+        label: "Portafolio de proyectos",
         href: "/admin/portfolio",
       },
       {
         icon: "lucide:message-circle",
-        label: "Pagina contacto",
+        label: "Contacto",
         href: "/admin/contact",
       },
     ],
@@ -95,7 +95,7 @@ export const navItemsSidebar: NavSection[] = [
       {
         icon: "lucide:briefcase",
         label: "Experiencias laborales",
-        href: "/admin/experiences",
+        href: "/admin/work-experiences",
       },
     ],
   },
@@ -105,7 +105,7 @@ export const navItemsSidebar: NavSection[] = [
       {
         icon: "lucide:settings",
         label: "Ajustes de cuenta",
-        href: "/settings",
+        href: "/admin/settings",
       },
     ],
   },

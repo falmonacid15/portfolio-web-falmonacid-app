@@ -41,6 +41,7 @@ export const getCloudinaryConfig = () => ({
   cloudName: env.CLOUDINARY_CLOUD_NAME,
   apiKey: env.CLOUDINARY_API_KEY,
   apiSecret: env.CLOUDINARY_API_SECRET,
+  uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "",
 });
 
 export const getApiBaseUrl = () => env.API_BASE_URL;

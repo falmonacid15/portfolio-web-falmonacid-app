@@ -93,10 +93,10 @@ export default function HomePageForm() {
 
   return (
     <form
-      className="flex flex-col mt-8 px-16 space-y-4"
+      className="flex flex-col mt-8 px-4 sm:px-16 space-y-4"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="flex justify-end items-center space-x-2">
+      <div className="flex justify-start sm:justify-end items-center space-x-2">
         {editing && (
           <Button
             color="danger"
@@ -134,12 +134,13 @@ export default function HomePageForm() {
       </div>
       <div className="flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-y-0 sm:space-x-8">
         <div className="flex flex-col space-y-2 w-full">
-          <h1 className="text-lg p-2 text-foreground/60 transition-colors">
+          <h1 className="text-lg p-2 text-foreground/60 transition-colors mb-8">
             Hero section
           </h1>
           <Input
             isRequired
             size="lg"
+            labelPlacement="outside"
             label="Titulo"
             placeholder="Titulo del hero"
             variant="faded"
@@ -152,6 +153,7 @@ export default function HomePageForm() {
           <Textarea
             isRequired
             size="lg"
+            labelPlacement="outside"
             label="Subtitulo"
             placeholder="Subtitulo del hero"
             variant="faded"
@@ -164,12 +166,13 @@ export default function HomePageForm() {
           />
         </div>
         <div className="flex flex-col space-y-2 w-full">
-          <h1 className="text-lg p-2 text-foreground/60 transition-colors">
+          <h1 className="text-lg p-2 text-foreground/60 transition-colors mb-8">
             Work Experiences timeline
           </h1>
           <Input
             isRequired
             size="lg"
+            labelPlacement="outside"
             label="Titulo"
             placeholder="Titulo de experiencia laboral"
             variant="faded"
@@ -182,6 +185,7 @@ export default function HomePageForm() {
           <Textarea
             isRequired
             size="lg"
+            labelPlacement="outside"
             label="Subtitulo"
             placeholder="Subtitulo de experiencia laboral"
             variant="faded"
@@ -194,12 +198,13 @@ export default function HomePageForm() {
           />
         </div>
         <div className="flex flex-col space-y-2 w-full">
-          <h1 className="text-lg p-2 text-foreground/60 transition-colors">
+          <h1 className="text-lg p-2 text-foreground/60 transition-colors mb-8">
             Portfolio section
           </h1>
           <Input
             isRequired
             size="lg"
+            labelPlacement="outside"
             label="Titulo"
             placeholder="Titulo de portafolio de proyectos"
             variant="faded"
@@ -212,6 +217,7 @@ export default function HomePageForm() {
           <Textarea
             isRequired
             size="lg"
+            labelPlacement="outside"
             label="Subtitulo"
             placeholder="Subtitulo de porafolio de proyectos"
             variant="faded"

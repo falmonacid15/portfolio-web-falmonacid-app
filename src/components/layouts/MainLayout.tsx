@@ -22,10 +22,10 @@ const MainLayout = () => {
         />
         <div
           className={`flex-1 flex flex-col transition-all duration-300 ${
-            isExpanded ? "md:ml-64" : "md:ml-16"
+            isExpanded ? "sm:ml-64" : "sm:ml-16"
           } ml-0`}
         >
-          <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="flex-1 container mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 overflow-x-hidden">
             <Outlet />
           </main>
         </div>

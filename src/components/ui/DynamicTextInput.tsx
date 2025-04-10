@@ -1,4 +1,4 @@
-import { Button, Input } from "@heroui/react";
+import { Button, Input, Textarea } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { UseFormRegister, useFieldArray, Control } from "react-hook-form";
 
@@ -7,7 +7,10 @@ interface DynamicTextInputProps {
   control: Control<any>;
   register: UseFormRegister<any>;
   label?: string;
+  buttonLabel?: string;
+  inputPlaceholder?: string;
   disabled?: boolean;
+  typeInput?: "input" | "textarea";
 }
 
 export const DynamicTextInput: React.FC<DynamicTextInputProps> = ({
@@ -16,6 +19,9 @@ export const DynamicTextInput: React.FC<DynamicTextInputProps> = ({
   register,
   label = "Textos",
   disabled = false,
+  buttonLabel = "Agregar texto",
+  inputPlaceholder = "Ingrese texto",
+  typeInput = "input",
 }) => {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -25,7 +31,7 @@ export const DynamicTextInput: React.FC<DynamicTextInputProps> = ({
   return (
     <div className="space-y-4">
       <label
-        className={`block text-sm font-medium ${
+        className={`block text-base font-semibold ${
           disabled ? "text-foreground/40" : "text-foreground"
         }`}
       >
@@ -38,17 +44,28 @@ export const DynamicTextInput: React.FC<DynamicTextInputProps> = ({
         onPress={() => append("")}
         isDisabled={disabled}
       >
-        Agregar texto
+        {buttonLabel}
       </Button>
 
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-2">
-          <Input
-            {...register(`${name}.${index}`)}
-            placeholder="Ingrese texto"
-            variant="faded"
-            isDisabled={disabled}
-          />
+          {typeInput === "input" ? (
+            <Input
+              {...register(`${name}.${index}`)}
+              placeholder={inputPlaceholder}
+              variant="faded"
+              labelPlacement="outside"
+              isDisabled={disabled}
+            />
+          ) : (
+            <Textarea
+              {...register(`${name}.${index}`)}
+              placeholder="Ingrese texto"
+              variant="faded"
+              labelPlacement="outside"
+              isDisabled={disabled}
+            />
+          )}
 
           <Button
             isIconOnly

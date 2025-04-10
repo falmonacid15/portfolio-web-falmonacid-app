@@ -32,36 +32,36 @@ export default function GitHubCommits() {
   const owner = "falmonacid15";
   const repo = "porfolio-web-falmonacid";
 
-  useEffect(() => {
-    const fetchCommits = async () => {
-      try {
-        setLoading(true);
-        const response = await octokit.request(
-          `GET /repos/${owner}/${repo}/commits`,
-          {
-            owner,
-            repo,
-            per_page: 5,
-          }
-        );
+  // useEffect(() => {
+  //   const fetchCommits = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const response = await octokit.request(
+  //         `GET /repos/${owner}/${repo}/commits`,
+  //         {
+  //           owner,
+  //           repo,
+  //           per_page: 5,
+  //         }
+  //       );
 
-        console.log(response.data);
-      } catch (err) {
-        const errorMessage = axios.isAxiosError(err)
-          ? `GitHub API error: ${err.response?.status} - ${
-              err.response?.data?.message || err.message
-            }`
-          : "Error fetching commits";
+  //       console.log(response.data);
+  //     } catch (err) {
+  //       const errorMessage = axios.isAxiosError(err)
+  //         ? `GitHub API error: ${err.response?.status} - ${
+  //             err.response?.data?.message || err.message
+  //           }`
+  //         : "Error fetching commits";
 
-        setError(errorMessage);
-        console.error("Failed to fetch GitHub commits:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setError(errorMessage);
+  //       console.error("Failed to fetch GitHub commits:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchCommits();
-  }, []);
+  //   fetchCommits();
+  // }, []);
 
   return (
     <Card className="shadow-md">

@@ -204,7 +204,9 @@ export function DataTable<T extends BaseRow>({
           className="flex items-center gap-2"
           size="sm"
         >
-          {item.hasDemo ? "Si tiene" : "No tiene"}
+          <span className="font-bold">
+            {item.hasDemo ? "Si tiene" : "No tiene"}
+          </span>
         </Chip>
       );
     }
@@ -215,7 +217,20 @@ export function DataTable<T extends BaseRow>({
           className="flex items-center gap-2"
           size="sm"
         >
-          {item.hasDemo ? "Si tiene" : "No tiene"}
+          <span className="font-bold">
+            {item.hasDemo ? "Si tiene" : "No tiene"}
+          </span>
+        </Chip>
+      );
+    }
+    if (columnKey === "isFeatured") {
+      return (
+        <Chip
+          color={item.hasRepo ? "success" : "danger"}
+          className="flex items-center gap-2 "
+          size="sm"
+        >
+          <span className="font-bold">{item.hasDemo ? "Si" : "No"}</span>
         </Chip>
       );
     }
@@ -239,6 +254,8 @@ export function DataTable<T extends BaseRow>({
     <div className="flex flex-col gap-4">
       <Table
         aria-label="Custom data table"
+        layout="fixed"
+        isStriped
         bottomContent={
           pages > 1 ? (
             <div className="flex justify-center">
