@@ -47,6 +47,7 @@ export interface DataTableProps<T extends BaseRow> {
   itemsPerPage?: number;
   onEdit?: (row: T) => void;
   onView?: (row: T) => void;
+  onViewLabel?: string;
   onDelete?: (row: T) => void;
   actionButton?: () => void;
   actionButtonLabel?: string;
@@ -67,6 +68,7 @@ export function DataTable<T extends BaseRow>({
   itemsPerPage = 5,
   onEdit,
   onView,
+  onViewLabel = "Ver",
   onDelete,
   actionButton,
   actionButtonLabel = "Nuevo registro",
@@ -119,7 +121,7 @@ export function DataTable<T extends BaseRow>({
       return (
         <div className="flex gap-2">
           {onView && (
-            <Tooltip content="View">
+            <Tooltip content={onViewLabel}>
               <Button
                 isIconOnly
                 size="sm"
@@ -180,13 +182,7 @@ export function DataTable<T extends BaseRow>({
           color={item.isActive ? "success" : "danger"}
           className="flex items-center gap-2"
         >
-          <Icon
-            icon={item.isActive ? "lucide:check-circle" : "lucide:x-circle"}
-            className={
-              item.isActive ? "text-success w-6 h-6" : "text-danger w-6 h-6"
-            }
-          />
-          <span>{item.isActive ? "Activo" : "Inactivo"}</span>
+          <span className="font-bold">{item.hasDemo ? "Si" : "No"}</span>
         </Chip>
       );
     }

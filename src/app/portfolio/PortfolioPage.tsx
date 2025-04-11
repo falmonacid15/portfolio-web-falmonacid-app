@@ -3,8 +3,12 @@ import PortfolioPageForm from "../../components/forms/PortfolioPageForm";
 import HeaderPage from "../../components/shared/layout/HeaderPage";
 import { DataTable } from "../../components/ui/DataTable";
 import api from "../../lib/axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Project } from "../../interfaces/models/Project";
+import { useDisclosure } from "@heroui/react";
+import ViewModal from "../../components/ui/ViewModal";
+import ViewProject from "../../components/pages/portfolio/ViewProject";
 
 const projectsColumns = [
   {
@@ -41,15 +45,25 @@ const projectsColumns = [
   },
 ];
 
+interface ProjectsResponse {
+  data: Project[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export default function PortfolioPage() {
   const [page, setPage] = useState<number>(1);
+  const [project, setProject] = useState<Project>();
 
   const route = useNavigate();
+
+  const projectModalDisclosure = useDisclosure();
 
   const { data: projects, isLoading: projectsIsLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const res = await api.get("/projects");
+      const res = await api.get<ProjectsResponse>("/projects");
       return res.data;
     },
   });
@@ -62,19 +76,38 @@ export default function PortfolioPage() {
     route("/admin/projects");
   };
 
+  const handleViewProject = (project: Project) => {
+    setProject(project);
+    projectModalDisclosure.onOpenChange();
+  };
+
+  useEffect(() => {
+    if (!projectModalDisclosure.isOpen && project) {
+      setProject(undefined);
+    }
+  }, [projectModalDisclosure.isOpen, project]);
+
   return (
     <div className="flex flex-col space-y-8">
       <HeaderPage
         title="Pagina Portafolio de proyectos"
         description="Controla desde aquí todo el contenido de la pagina proyectos de tu portafolio."
       />
+      <ViewModal
+        key="projects"
+        isOpen={projectModalDisclosure.isOpen}
+        onOpenChange={projectModalDisclosure.onOpenChange}
+        title={project?.name || ""}
+      >
+        <ViewProject {...(project as Project)} />
+      </ViewModal>
       <div className="flex flex-col">
         <h1>Seccion de proyectos</h1>
         <PortfolioPageForm />
       </div>
       <div className="flex flex-col space-y-4">
         <h1>Proyectos</h1>
-        <DataTable
+        <DataTable<Project>
           key="portfolio-projects"
           columns={projectsColumns}
           rows={projects?.data || []}
@@ -87,6 +120,8 @@ export default function PortfolioPage() {
           actionButton={handleActionButton}
           actionButtonLabel="Ir a ver todos los proyectos"
           actionButtonIcon="lucide:folder"
+          onView={handleViewProject}
+          onViewLabel="Ver proyecto"
         />
       </div>
     </div>
