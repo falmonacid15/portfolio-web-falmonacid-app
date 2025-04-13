@@ -10,4 +10,5 @@ export interface SkillCategory {
   aboutMe: AboutMe;
   createdAt: Date;
   updatedAt: Date;
+  [key: string]: any;
 }
