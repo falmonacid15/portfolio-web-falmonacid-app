@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Project } from "../../interfaces/models/Project";
 import { useDisclosure } from "@heroui/react";
-import ViewModal from "../../components/ui/ViewModal";
+import ViewModal from "../../components/ui/modals/ViewModal";
 import ViewProject from "../../components/pages/portfolio/ViewProject";
 
 const projectsColumns = [

@@ -23,7 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 interface ProjectFormProps {
   onSuccess?: () => void;
-  projectId?: string; // For editing existing projects
+  projectId?: string;
 }
 
 const ProjectForm = forwardRef<
@@ -60,8 +60,6 @@ const ProjectForm = forwardRef<
       isActive: true,
     },
   });
-
-  // Expose submit method to parent component
   useImperativeHandle(ref, () => ({
     submit: async () => {
       const isValid = await trigger();

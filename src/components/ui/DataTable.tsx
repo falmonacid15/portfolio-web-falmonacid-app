@@ -188,7 +188,7 @@ export function DataTable<T extends BaseRow>({
     }
     if (columnKey === "description" || columnKey === "shortDescription") {
       return (
-        <p className="text-sm text-foreground/80 line-clamp-2">
+        <p className="text-sm text-foreground/80 line-clamp-3 w-full">
           {formatValue(item.description || item.shortDescription)}
         </p>
       );
@@ -250,7 +250,7 @@ export function DataTable<T extends BaseRow>({
     <div className="flex flex-col gap-4">
       <Table
         aria-label="Custom data table"
-        layout="fixed"
+        layout="auto"
         isStriped
         bottomContent={
           pages > 1 ? (
@@ -312,7 +312,7 @@ export function DataTable<T extends BaseRow>({
               {(columnKey) => (
                 <TableCell
                   className={
-                    columnKey === "actions" ? "w-[120px] text-right" : "flex-1"
+                    columnKey === "actions" ? "w-[15%] text-right" : "flex-1"
                   }
                 >
                   {renderCell(item, columnKey as keyof T | "actions")}

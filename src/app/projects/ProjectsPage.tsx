@@ -5,7 +5,7 @@ import api from "../../lib/axios";
 import { useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Project } from "../../interfaces/models/Project";
-import FormModal from "../../components/ui/FormModal";
+import FormModal from "../../components/ui/modals/FormModal";
 import ProjectForm from "../../components/forms/ProjectForm";
 import { useDisclosure } from "@heroui/react";
 import { CreateProjectInput } from "../../schemas/ProjectSchema";
@@ -49,7 +49,11 @@ export default function ProjectsPage() {
 
   const projectModalDisclosure = useDisclosure();
 
-  const { data: projects, isLoading: projectsIsLoading, refetch } = useQuery({
+  const {
+    data: projects,
+    isLoading: projectsIsLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["projects", page, debouncedSearch],
     queryFn: async () => {
       const res = await api.get("/projects");
@@ -84,7 +88,7 @@ export default function ProjectsPage() {
         onOpenChange={projectModalDisclosure.onOpenChange}
         title="Projecto"
       >
-        <ProjectForm 
+        <ProjectForm
           onSuccess={() => {
             projectModalDisclosure.onOpenChange();
             refetch();

@@ -9,4 +9,6 @@ export interface WorkExperience {
   home: Home;
   createdAt: Date;
   updatedAt: Date;
+
+  [key: string]: any;
 }
