@@ -45,7 +45,7 @@ export default function HomePageForm() {
   const updateHomePageMutation = useMutation({
     mutationKey: ["homepage-update"],
     mutationFn: async (data: CreateHomePageInput) => {
-      const res = await api.post("/home/upsert", data);
+      const res = await api.patch(`/home/${homePagedata.id}`, data);
       return res.data;
     },
     onSuccess: () => {
@@ -107,8 +107,9 @@ export default function HomePageForm() {
               setEditing(false);
             }}
             type="button"
+            isDisabled={updateHomePageMutation.isPending}
           >
-            Cancelar edicion
+            Cancelar edición
           </Button>
         )}
         {editing ? (
@@ -117,6 +118,7 @@ export default function HomePageForm() {
             variant="ghost"
             startContent={<Icon icon="lucide:save" className="w-5 h-5" />}
             type="submit"
+            isLoading={updateHomePageMutation.isPending}
           >
             Guardar contenido
           </Button>

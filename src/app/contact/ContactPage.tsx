@@ -29,7 +29,7 @@ export default function ContactPage() {
         description="Controla desde aquí todo el contenido de la pagina contacto de tu portafolio."
       />
       <div className="flex flex-col">
-        <h1>Seccion de proyectos</h1>
+        <h1>Sección de contacto</h1>
         <ContactPageForm />
       </div>
       <div className="flex flex-col space-y-4">

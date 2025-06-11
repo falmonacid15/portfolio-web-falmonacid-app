@@ -6,8 +6,8 @@ export default function AdminPage() {
   return (
     <div>
       <HeaderPage
-        title="Panel de administracion"
-        description="Controla desde aqui todo el contenido de tu portafolio."
+        title="Panel de administración"
+        description="Controla desde aquí todo el contenido de tu portafolio."
       />
       <StatsCards />
       <div className="mt-6 px-8">

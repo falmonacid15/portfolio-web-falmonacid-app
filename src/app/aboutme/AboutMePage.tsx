@@ -33,7 +33,7 @@ export default function AboutMePage() {
     useQuery({
       queryKey: ["skillsCategories"],
       queryFn: async () => {
-        const res = await api.get("/skill-categories");
+        const res = await api.get("/skill-category");
         return res.data;
       },
     });
@@ -41,8 +41,8 @@ export default function AboutMePage() {
   const { data: skills, isLoading: isLoadingSkills } = useQuery({
     queryKey: ["skills"],
     queryFn: async () => {
-      const res = await api.get("/skills");
-      return res.data.data.data;
+      const res = await api.get("/skill");
+      return res.data;
     },
   });
 
@@ -59,19 +59,19 @@ export default function AboutMePage() {
         Mantenedores de habilidades
       </h1>
       <div className="flex justify-between space-x-8">
-        <div className="flex flex-col space-y-2">
-          <h1>Categorias de habilidades</h1>
+        <div className="flex flex-col space-y-2 w-full">
+          <h1>Categorías de habilidades</h1>
           <DataTable
             key="skillsCategories"
             actionButton={handleNavigateToSkillsCategories}
-            actionButtonLabel="Ir a categorias de habilidades"
+            actionButtonLabel="Ir a categorías de habilidades"
             actionButtonIcon="lucide:tag"
             onView={handleOnViewSkillCategory}
             columns={skillsCategoriesColumns}
-            rows={skillsCategories || []}
+            rows={skillsCategories?.data || []}
           />
         </div>
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-2 w-full">
           <h1>Habilidades</h1>
           <DataTable
             key="skills"
@@ -80,7 +80,7 @@ export default function AboutMePage() {
             actionButtonIcon="lucide:code-2"
             onView={handleOnViewSkill}
             columns={skillsColumns}
-            rows={skills || []}
+            rows={skills?.data || []}
           />
         </div>
       </div>

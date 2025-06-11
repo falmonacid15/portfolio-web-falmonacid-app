@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Card, CardHeader, CardBody, Spinner, Chip } from "@heroui/react";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Spinner,
+  Chip,
+  Button,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import axios from "axios";
-import { getGithubPersonalToken } from "../../../config/env";
-import { Octokit } from "octokit";
-
-const octokit = new Octokit({ auth: getGithubPersonalToken() });
 
 interface Commit {
   sha: string;
@@ -29,42 +32,48 @@ export default function GitHubCommits() {
   const [commits, setCommits] = useState<Commit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const perPage = 5;
+
   const owner = "falmonacid15";
   const repo = "porfolio-web-falmonacid";
 
-  // useEffect(() => {
-  //   const fetchCommits = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const response = await octokit.request(
-  //         `GET /repos/${owner}/${repo}/commits`,
-  //         {
-  //           owner,
-  //           repo,
-  //           per_page: 5,
-  //         }
-  //       );
+  const fetchCommits = async (page: number) => {
+    try {
+      const res = await axios.get(
+        `${
+          import.meta.env.VITE_GITHUB_API_BASE_URL
+        }/repos/${owner}/${repo}/commits`,
+        {
+          headers: {
+            Authorization: `Bearer ${
+              import.meta.env.VITE_GITHUB_PERSONAL_TOKEN
+            }`,
+          },
+          params: {
+            per_page: perPage,
+            page: page,
+          },
+        }
+      );
+      setCommits(res.data);
+      setHasNextPage(res.data.length === perPage);
+    } catch (error) {
+      setError("Error al obtener los commits");
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  //       console.log(response.data);
-  //     } catch (err) {
-  //       const errorMessage = axios.isAxiosError(err)
-  //         ? `GitHub API error: ${err.response?.status} - ${
-  //             err.response?.data?.message || err.message
-  //           }`
-  //         : "Error fetching commits";
-
-  //       setError(errorMessage);
-  //       console.error("Failed to fetch GitHub commits:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchCommits();
-  // }, []);
+  useEffect(() => {
+    fetchCommits(page);
+  }, [page]);
 
   return (
-    <Card className="shadow-md">
+    <Card className="shadow-lg">
       <CardHeader className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Icon icon="lucide:git-branch" className="text-xl text-primary" />
@@ -141,6 +150,28 @@ export default function GitHubCommits() {
             ))}
           </div>
         )}
+        {!loading && commits.length === 0 && (
+          <p className="text-center text-foreground/60 mt-4">
+            No hay más commits para mostrar.
+          </p>
+        )}
+        <div className="flex justify-between mt-4">
+          <Button
+            isDisabled={page === 1}
+            onPress={() => setPage((prev) => Math.max(prev - 1, 1))}
+            color="primary"
+          >
+            Anterior
+          </Button>
+          <span className="text-sm">Página {page}</span>
+          <Button
+            isDisabled={!hasNextPage}
+            onPress={() => setPage((prev) => prev + 1)}
+            color="primary"
+          >
+            Siguiente
+          </Button>
+        </div>
       </CardBody>
     </Card>
   );

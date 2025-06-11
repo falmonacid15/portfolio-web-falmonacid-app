@@ -36,9 +36,9 @@ export default function ViewProject({
       </div>
       <div>
         <h2>Tecnologias</h2>
-        {techonologies.map((techonology) => (
+        {/* {techonologies.map((techonology) => (
           <p key={techonology}>{techonology}</p>
-        ))}
+        ))} */}
       </div>
     </div>
   );

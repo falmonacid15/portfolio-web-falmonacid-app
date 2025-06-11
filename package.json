@@ -21,6 +21,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.6.3",
     "iframe-resizer-react": "^5.1.5",
+    "js-cookie": "^3.0.5",
     "octokit": "^4.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

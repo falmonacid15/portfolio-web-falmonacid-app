@@ -37,9 +37,12 @@ export default function LoginForm() {
       return res.data;
     },
     onSuccess: (data) => {
-      login(data);
+      login({
+        token: data.access_token,
+        user: data.payload,
+      });
       addToast({
-        title: `Hola denuevo, ${data.user.name}`,
+        title: `Hola denuevo, ${data.payload.name}`,
         description: "Bienvenido a tu panel de administracion.",
         color: "success",
         classNames: {

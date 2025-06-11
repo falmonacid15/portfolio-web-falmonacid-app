@@ -1,6 +1,6 @@
 import { addToast, Button, Input, Textarea } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   CreatePortfolioPageInput,
@@ -35,7 +35,7 @@ export default function PortfolioPageForm() {
   const upsertPortfolioPageMutation = useMutation({
     mutationKey: ["upsertPortfolioPage"],
     mutationFn: async (data: CreatePortfolioPageInput) => {
-      const res = await api.post("/portfolio/upsert", data);
+      const res = await api.patch(`/portfolio/${portfolioData.id}`, data);
 
       return res.data;
     },
@@ -64,7 +64,12 @@ export default function PortfolioPageForm() {
     }
   };
 
-  console.log(portfolioData);
+  useEffect(() => {
+    if (portfolioData) {
+      setValue("title", portfolioData.title);
+      setValue("description", portfolioData.description);
+    }
+  }, [portfolioData]);
   return (
     <form className="flex flex-col space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex justify-end mb-4 space-x-4">

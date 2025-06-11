@@ -36,8 +36,8 @@ export default function AboutmePageForm() {
   const { data: AboutMePageData } = useQuery({
     queryKey: ["AboutMePage"],
     queryFn: async () => {
-      const { data } = await api.get("/aboutme/first");
-      return data.data;
+      const res = await api.get("/aboutme/first");
+      return res.data;
     },
   });
 
@@ -52,24 +52,31 @@ export default function AboutmePageForm() {
       data.descriptions.forEach((description, index) => {
         formData.append(`descriptions[${index}]`, description);
       });
-      formData.append("image", data.image);
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
 
-      const { data: response } = await api.post("/aboutme/upsert", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const { data: response } = await api.patch(
+        `/aboutme/${AboutMePageData.id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       return response;
     },
     onSuccess: () => {
       addToast({
         title: "Actualizado",
-        description: "Se ha actualizado la pagina con exito",
+        description: "Se ha actualizado la pagina con éxito",
         color: "success",
       });
     },
     onError: () => {
+      console.log("error");
       addToast({
         title: "Error",
         description: "Ha ocurrido un error al actualizar la pagina",
@@ -81,7 +88,7 @@ export default function AboutmePageForm() {
   const onSubmit = (data: CreateAboutMePageInput) => {
     if (editing) {
       updateAboutMePageMutation.mutate(data);
-      console.log(data);
+
       setEditing(false);
     } else {
       setEditing(true);
@@ -99,6 +106,7 @@ export default function AboutmePageForm() {
       setValue("descriptions", AboutMePageData.descriptions);
       setValue("skillsTitle", AboutMePageData.skillsTitle);
       setValue("skillsSubtitle", AboutMePageData.skillsSubtitle);
+      setValue("image", AboutMePageData.image);
     }
   }, [AboutMePageData, setValue]);
 

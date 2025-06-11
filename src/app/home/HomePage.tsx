@@ -3,6 +3,8 @@ import HomePageForm from "../../components/forms/HomePageForm";
 import HeaderPage from "../../components/shared/layout/HeaderPage";
 import { DataTable } from "../../components/ui/DataTable";
 import api from "../../lib/axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const workExperiencesColumns = [
   {
@@ -15,13 +17,10 @@ const workExperiencesColumns = [
   },
   {
     key: "description",
-    label: "DESCRIPCION",
-  },
-  {
-    key: "actions",
-    label: "ACCIONES",
+    label: "DESCRIPCIÓN",
   },
 ];
+
 const projectsColumns = [
   {
     key: "name",
@@ -29,7 +28,7 @@ const projectsColumns = [
   },
   {
     key: "shortDescription",
-    label: "DESCRIPCION CORTA",
+    label: "DESCRIPCIÓN CORTA",
   },
   {
     key: "hasDemo",
@@ -37,36 +36,45 @@ const projectsColumns = [
   },
   {
     key: "hasRepo",
-    label: "¿TIENE CODIGO FUENTE?",
-  },
-  {
-    key: "actions",
-    label: "ACCIONES",
+    label: "¿TIENE CÓDIGO FUENTE?",
   },
 ];
 
 export default function HomePage() {
+  const [workExperiencePage, setWorkExperiencePage] = useState(1);
+  const [projectsPage, setProjectsPage] = useState(1);
+
+  const router = useNavigate();
+
   const { data: workExperiences } = useQuery({
-    queryKey: ["workExperiences"],
+    queryKey: ["workExperiences", workExperiencePage],
     queryFn: async () => {
-      const { data } = await api.get("/work-experiences");
-      return data.data;
+      const res = await api.get(`/work-experience?page=${workExperiencePage}`);
+      return res.data;
     },
   });
 
   const { data: projects } = useQuery({
-    queryKey: ["projects"],
+    queryKey: ["projects", projectsPage],
     queryFn: async () => {
-      const { data } = await api.get("/projects");
-      return data.data;
+      const res = await api.get(`/projects?page=${projectsPage}`);
+      return res.data;
     },
   });
+
+  const handleWorkExperiencePageChange = (page: number) => {
+    setWorkExperiencePage(page);
+  };
+
+  const handleProjectsPageChange = (page: number) => {
+    setProjectsPage(page);
+  };
 
   return (
     <div className="flex flex-col w-full">
       <HeaderPage
         title="Pagina Inicio"
-        description="Controla desde aqui todo el contenido de la pagina de inicio de tu portafolio."
+        description="Controla desde aquí todo el contenido de la pagina de inicio de tu portafolio."
       />
       <HomePageForm />
       <div className="flex flex-col sm:flex-row w-full px-4 sm:px-16 mt-8 space-y-8 space-x-0 sm:space-y-0 sm:space-x-8">
@@ -75,11 +83,15 @@ export default function HomePage() {
           <div className="overflow-x-auto">
             <DataTable
               columns={workExperiencesColumns}
-              rows={workExperiences || []}
-              actionButton={() => {}}
-              onView={() => {}}
+              rows={workExperiences?.data || []}
+              actionButton={() => {
+                router("/admin/work-experiences");
+              }}
               actionButtonLabel="Ir a experiencias laborales"
               actionButtonIcon="lucide:briefcase"
+              onPageChange={handleWorkExperiencePageChange}
+              page={workExperiencePage}
+              totalCount={workExperiences?.meta.totalCount || 0}
             />
           </div>
         </div>
@@ -88,11 +100,15 @@ export default function HomePage() {
           <div className="overflow-x-auto">
             <DataTable
               columns={projectsColumns}
-              rows={projects || []}
-              actionButton={() => {}}
-              onView={() => {}}
+              rows={projects?.data || []}
+              actionButton={() => {
+                router("/admin/projects");
+              }}
               actionButtonLabel="Ir a proyectos"
               actionButtonIcon="lucide:folder"
+              onPageChange={handleProjectsPageChange}
+              page={projectsPage}
+              totalCount={projects?.meta.totalCount || 0}
             />
           </div>
         </div>

@@ -45,13 +45,6 @@ const projectsColumns = [
   },
 ];
 
-interface ProjectsResponse {
-  data: Project[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
 export default function PortfolioPage() {
   const [page, setPage] = useState<number>(1);
   const [project, setProject] = useState<Project>();
@@ -63,7 +56,7 @@ export default function PortfolioPage() {
   const { data: projects, isLoading: projectsIsLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const res = await api.get<ProjectsResponse>("/projects");
+      const res = await api.get("/projects");
       return res.data;
     },
   });
@@ -102,7 +95,7 @@ export default function PortfolioPage() {
         <ViewProject {...(project as Project)} />
       </ViewModal>
       <div className="flex flex-col">
-        <h1>Seccion de proyectos</h1>
+        <h1>Sección de proyectos</h1>
         <PortfolioPageForm />
       </div>
       <div className="flex flex-col space-y-4">
@@ -111,7 +104,7 @@ export default function PortfolioPage() {
           key="portfolio-projects"
           columns={projectsColumns}
           rows={projects?.data || []}
-          totalCount={projects?.total || 0}
+          totalCount={projects?.meta.totalCount || 0}
           isLoading={projectsIsLoading}
           page={page}
           onPageChange={handleChangePage}
