@@ -32,10 +32,6 @@ export default function ContactPage() {
         <h1>Sección de contacto</h1>
         <ContactPageForm />
       </div>
-      <div className="flex flex-col space-y-4">
-        <h1>Mensajes de contacto</h1>
-        <DataTable columns={contactsFormsColumns} rows={[]} />
-      </div>
     </div>
   );
 }

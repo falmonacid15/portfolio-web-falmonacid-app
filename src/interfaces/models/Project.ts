@@ -11,7 +11,7 @@ export interface Project extends BaseRow {
   images: string[];
   repositoryUrl?: string;
   demoUrl?: string;
-  techonologies: string[];
+  technologies: string[];
   languages: string[];
   hasDemo: boolean;
   hasRepo: boolean;
