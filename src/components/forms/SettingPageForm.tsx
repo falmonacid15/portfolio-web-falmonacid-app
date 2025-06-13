@@ -1,4 +1,4 @@
-import { Button, Divider, Input, addToast } from "@heroui/react";
+import { Button, Input, addToast } from "@heroui/react";
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../store/authStore";
@@ -10,13 +10,11 @@ import {
   accountSettingSchema,
 } from "../../schemas/SettingsPageSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
 
 export default function SettingPageForm() {
   const [editing, setEditing] = useState(false);
   const { session, logout } = useAuthStore();
   const queryClient = useQueryClient();
-  const router = useNavigate();
 
   const {
     register,
@@ -24,7 +22,7 @@ export default function SettingPageForm() {
     setValue,
     watch,
     reset,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<AccountSettingInput>({
     resolver: zodResolver(accountSettingSchema),
     mode: "onChange",
@@ -48,7 +46,11 @@ export default function SettingPageForm() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: AccountSettingInput) => {
-      const res = await api.patch(`/users/${session?.user?.id}`, data);
+      const res = await api.patch(`/users/${session?.user?.id}`, {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
       return res.data;
     },
     onSuccess: () => {
@@ -126,7 +128,6 @@ export default function SettingPageForm() {
             startContent={<Icon icon="lucide:save" className="w-5 h-5" />}
             type="submit"
             isLoading={updateUserMutation.isPending}
-            isDisabled={!isDirty}
           >
             Actualizar credenciales
           </Button>

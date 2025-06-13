@@ -2,7 +2,6 @@ import { addToast, Input, Select, SelectItem, Textarea } from "@heroui/react";
 import useFormStore from "../../store/formStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../lib/axios";
-import { Home } from "../../interfaces/models/Home";
 import { useForm } from "react-hook-form";
 import {
   SkillCategoryInputs,
@@ -27,22 +26,17 @@ export default function SkillCategoryForm({
 }: SkillCategoryFormProps) {
   const { setFormSubmitted } = useFormStore();
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<SkillCategoryInputs>({
-    resolver: zodResolver(skillCategorySchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      aboutMeId: "",
-    },
-  });
+  const { register, handleSubmit, watch, setValue } =
+    useForm<SkillCategoryInputs>({
+      resolver: zodResolver(skillCategorySchema),
+      defaultValues: {
+        name: "",
+        description: "",
+        aboutMeId: "",
+      },
+    });
 
-  const { data: homes, isLoading } = useQuery({
+  const { data: homes } = useQuery({
     queryKey: ["homes"],
     queryFn: async () => {
       const res = await api.get<{

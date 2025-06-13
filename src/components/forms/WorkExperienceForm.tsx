@@ -28,7 +28,6 @@ export default function WorkExperienceForm({
     register,
     control,
     handleSubmit,
-    trigger,
     watch,
     setValue,
     formState: { errors },

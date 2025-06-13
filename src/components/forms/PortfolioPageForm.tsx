@@ -114,6 +114,7 @@ export default function PortfolioPageForm() {
         label="Titulo seccion proyectos"
         placeholder="Ingrese el titulo para la sección proyectos"
         variant="faded"
+        value={watch("title")}
         isDisabled={!editing}
         isInvalid={!!errors.title}
         errorMessage={errors.title?.message}
@@ -125,6 +126,7 @@ export default function PortfolioPageForm() {
         label="Subtitulo sección proyectos"
         placeholder="Ingrese el subtitulo para la sección proyectos"
         variant="faded"
+        value={watch("description")}
         isDisabled={!editing}
         isInvalid={!!errors.description}
         errorMessage={errors.description?.message}

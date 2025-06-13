@@ -8,7 +8,6 @@ export default function ViewProject({
   mainImage,
   images,
   languages,
-  techonologies,
 }: Project) {
   return (
     <div className="flex flex-col">

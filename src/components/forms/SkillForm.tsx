@@ -22,13 +22,7 @@ export default function SkillForm({
 }: SkillFormProps) {
   const { setFormSubmitted } = useFormStore();
 
-  const {
-    register,
-    watch,
-    setValue,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SkillInputs>({
+  const { register, watch, setValue, handleSubmit } = useForm<SkillInputs>({
     resolver: zodResolver(skillSchema),
     defaultValues: {
       name: "",

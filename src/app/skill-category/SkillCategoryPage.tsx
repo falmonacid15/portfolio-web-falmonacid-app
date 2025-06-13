@@ -145,6 +145,7 @@ export default function SkillCategoryPage() {
           actionButtonLabel="Nueva categoría de habilidad"
           onEdit={handleEditSkillCategory}
           onDelete={handleDeleteSkillCategory}
+          isLoading={isLoadingSkillCategories}
         />
       </div>
     </div>

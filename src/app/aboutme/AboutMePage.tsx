@@ -69,6 +69,7 @@ export default function AboutMePage() {
             onView={handleOnViewSkillCategory}
             columns={skillsCategoriesColumns}
             rows={skillsCategories?.data || []}
+            isLoading={isLoadingSkillsCategories}
           />
         </div>
         <div className="flex flex-col space-y-2 w-full">
@@ -81,6 +82,7 @@ export default function AboutMePage() {
             onView={handleOnViewSkill}
             columns={skillsColumns}
             rows={skills?.data || []}
+            isLoading={isLoadingSkills}
           />
         </div>
       </div>

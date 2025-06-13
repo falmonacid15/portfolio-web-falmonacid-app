@@ -38,33 +38,27 @@ export default function ProjectForm({
 }: ProjectFormProps) {
   const { setFormSubmitted } = useFormStore();
 
-  const {
-    register,
-    control,
-    watch,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<CreateProjectInput>({
-    resolver: zodResolver(createProjectSchema),
-    defaultValues: {
-      name: "",
-      shortDescription: "",
-      mainImage: "",
-      isFeatured: false,
-      hasRepo: false,
-      demoUrl: "",
-      hasDemo: false,
-      homeId: "",
-      images: [],
-      isActive: true,
-      languages: [],
-      longDescription: "",
-      portfolioId: "",
-      repositoryUrl: "",
-      technologies: [],
-    },
-  });
+  const { register, control, watch, handleSubmit, setValue } =
+    useForm<CreateProjectInput>({
+      resolver: zodResolver(createProjectSchema),
+      defaultValues: {
+        name: "",
+        shortDescription: "",
+        mainImage: "",
+        isFeatured: false,
+        hasRepo: false,
+        demoUrl: "",
+        hasDemo: false,
+        homeId: "",
+        images: [],
+        isActive: true,
+        languages: [],
+        longDescription: "",
+        portfolioId: "",
+        repositoryUrl: "",
+        technologies: [],
+      },
+    });
 
   const { data: selectedProject } = useQuery({
     queryKey: ["project", projectId],

@@ -41,12 +41,12 @@ export default function SkillPage() {
 
   const {
     data: skills,
-    isPending,
+    isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["skills"],
+    queryKey: ["skills", page],
     queryFn: async () => {
-      const res = await api.get("/skill");
+      const res = await api.get(`/skill?page=${page}`);
       return res.data;
     },
   });
@@ -95,6 +95,10 @@ export default function SkillPage() {
     }
   };
 
+  const handleChangePage = (page: number) => {
+    setPage(page);
+  };
+
   useEffect(() => {
     if (!skillModalDisclosure.isOpen && selectedSkill) {
       setSelectedSkill(null);
@@ -141,6 +145,8 @@ export default function SkillPage() {
           actionButtonLabel="Nueva habilidad"
           onEdit={handleEditSkill}
           onDelete={handleDeleteSkill}
+          onPageChange={handleChangePage}
+          isLoading={isLoading}
         />
       </div>
     </div>

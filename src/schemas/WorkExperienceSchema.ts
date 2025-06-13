@@ -1,4 +1,3 @@
-import { de } from "date-fns/locale";
 import { z } from "zod";
 
 export const workExperienceSchema = z.object({

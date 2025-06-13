@@ -1,7 +1,7 @@
 import { addToast, Button, Input, Textarea } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
-import { useForm, Control } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateContactPageInput,
