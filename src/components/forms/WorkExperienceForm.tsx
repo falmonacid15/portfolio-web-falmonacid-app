@@ -1,35 +1,29 @@
 import { addToast, Input, Select, SelectItem, Textarea } from "@heroui/react";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   WorkExperienceInputs,
   workExperienceSchema,
 } from "../../schemas/WorkExperienceSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../lib/axios";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Home } from "../../interfaces/models/Home";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PaginationMeta } from "../../interfaces/pagination";
 
 interface WorkExperienceFormProps {
-  onSuccess?: () => void;
   workExperienceId: string | null;
+  onOpenChange: (open: boolean) => void;
+  formRef: React.RefObject<HTMLFormElement | null>;
+  reFetch: () => void;
 }
 
-const WorkExperienceForm = forwardRef<
-  { submit: () => Promise<boolean> },
-  WorkExperienceFormProps
->(({ onSuccess, workExperienceId }, ref) => {
-  useImperativeHandle(ref, () => ({
-    submit: async () => {
-      const isValid = await trigger();
-      if (isValid) {
-        return handleSubmit(onSubmit)();
-      }
-      console.log("Form validation failed", errors);
-      return false;
-    },
-  }));
-
+export default function WorkExperienceForm({
+  workExperienceId,
+  formRef,
+  onOpenChange,
+  reFetch,
+}: WorkExperienceFormProps) {
   const {
     register,
     control,
@@ -51,7 +45,10 @@ const WorkExperienceForm = forwardRef<
   const { data: homes, isLoading: homesIsLoading } = useQuery({
     queryKey: ["homes"],
     queryFn: async () => {
-      const res = await api.get<Home[]>("/home");
+      const res = await api.get<{
+        data: Home[];
+        meta: PaginationMeta;
+      }>("/home");
 
       return res.data;
     },
@@ -61,10 +58,10 @@ const WorkExperienceForm = forwardRef<
     data: selectedWorkExperience,
     isLoading: selectedWorkExperienceIsLoading,
   } = useQuery({
-    queryKey: ["work-experiences", workExperienceId],
+    queryKey: ["work-experience", workExperienceId],
     queryFn: async () => {
       const res = await api.get<WorkExperienceInputs>(
-        `/work-experiences/${workExperienceId}`
+        `/work-experience/${workExperienceId}`
       );
 
       return res.data;
@@ -75,16 +72,17 @@ const WorkExperienceForm = forwardRef<
   const createWorkExperienceMutation = useMutation({
     mutationKey: ["create-work-experience"],
     mutationFn: async (data: WorkExperienceInputs) => {
-      const res = await api.post("/work-experiences", data);
+      const res = await api.post("/work-experience", data);
       return res.data;
     },
     onSuccess: () => {
-      onSuccess?.();
       addToast({
         title: "Experiencia laboral creada",
         description: "La experiencia laboral se ha creado correctamente",
         color: "success",
       });
+      reFetch();
+      onOpenChange(false);
     },
     onError: () => {
       addToast({
@@ -98,19 +96,17 @@ const WorkExperienceForm = forwardRef<
   const updateWorkExperienceMutation = useMutation({
     mutationKey: ["update-work-experience"],
     mutationFn: async (data: WorkExperienceInputs) => {
-      const res = await api.patch(
-        `/work-experiences/${workExperienceId}`,
-        data
-      );
+      const res = await api.patch(`/work-experience/${workExperienceId}`, data);
       return res.data;
     },
     onSuccess: () => {
-      onSuccess?.();
       addToast({
         title: "Experiencia laboral actualizada",
         description: "La experiencia laboral se ha actualizado correctamente",
         color: "success",
       });
+      reFetch();
+      onOpenChange(false);
     },
     onError: () => {
       addToast({
@@ -122,11 +118,11 @@ const WorkExperienceForm = forwardRef<
     },
   });
 
-  const onSubmit = (data: WorkExperienceInputs) => {
+  const onSubmit = async (data: WorkExperienceInputs) => {
     if (workExperienceId) {
-      updateWorkExperienceMutation.mutate(data);
+      await updateWorkExperienceMutation.mutateAsync(data);
     } else {
-      createWorkExperienceMutation.mutate(data);
+      await createWorkExperienceMutation.mutateAsync(data);
     }
   };
 
@@ -140,7 +136,11 @@ const WorkExperienceForm = forwardRef<
   }, [selectedWorkExperience, setValue]);
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={handleSubmit(onSubmit)}
+      ref={formRef}
+    >
       <Input
         label="Título"
         placeholder="Ingrese titulo de la experiencia laboral"
@@ -179,7 +179,7 @@ const WorkExperienceForm = forwardRef<
             selectedKeys={field.value ? [field.value] : []}
             isInvalid={!!errors.homeId}
             errorMessage={errors.homeId?.message}
-            items={homes || []}
+            items={homes?.data || []}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0]?.toString() || "";
               field.onChange(selectedKey);
@@ -204,5 +204,4 @@ const WorkExperienceForm = forwardRef<
       />
     </form>
   );
-});
-export default WorkExperienceForm;
+}

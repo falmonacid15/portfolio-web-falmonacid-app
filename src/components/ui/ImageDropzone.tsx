@@ -52,14 +52,14 @@ export const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   }, [previews]);
 
   useEffect(() => {
-    if (existingImages && !value) {
+    if (existingImages) {
       if (multiple && Array.isArray(existingImages)) {
         setPreviews(existingImages);
-      } else if (!multiple && typeof existingImages === "string") {
+      } else if (!multiple && typeof existingImages === 'string') {
         setPreviews([existingImages]);
       }
     }
-  }, [existingImages, multiple, value]);
+  }, [existingImages, multiple]);
 
   const onDrop = React.useCallback(
     async (acceptedFiles: File[]) => {
@@ -159,7 +159,6 @@ export const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           </>
         ) : (
           <div className="w-full">
-            {/* Display file previews */}
             {multiple ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {previews.map((preview, index) => (

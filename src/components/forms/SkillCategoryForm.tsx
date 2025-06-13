@@ -1,188 +1,174 @@
-import { forwardRef, useEffect, useImperativeHandle } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { addToast, Input, Select, SelectItem, Textarea } from "@heroui/react";
+import useFormStore from "../../store/formStore";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import api from "../../lib/axios";
+import { Home } from "../../interfaces/models/Home";
+import { useForm } from "react-hook-form";
 import {
   SkillCategoryInputs,
   skillCategorySchema,
 } from "../../schemas/SkillCategorySchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addToast, Input, Select, SelectItem, Textarea } from "@heroui/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import api from "../../lib/axios";
 import { AboutMe } from "../../interfaces/models/Aboutme";
+import { useEffect } from "react";
 
 interface SkillCategoryFormProps {
-  onSuccess?: () => void;
   skillCategoryId: string | null;
+  onOpenChange: (open: boolean) => void;
+  formRef: React.RefObject<HTMLFormElement | null>;
+  reFetch: () => void;
 }
 
-interface AboutMeReponse {
-  data: AboutMe[];
-  total: number;
-  page: number;
-}
-const SkillCategoryForm = forwardRef<
-  { submit: () => Promise<boolean> },
-  SkillCategoryFormProps
->(({ onSuccess, skillCategoryId }, ref) => {
-  useImperativeHandle(ref, () => ({
-    submit: async () => {
-      const isValid = await trigger();
-      if (isValid) {
-        return handleSubmit(onSubmit)();
-      }
-      console.log("Form validation failed", errors);
-      return false;
-    },
-  }));
+export default function SkillCategoryForm({
+  skillCategoryId,
+  formRef,
+  onOpenChange,
+  reFetch,
+}: SkillCategoryFormProps) {
+  const { setFormSubmitted } = useFormStore();
 
   const {
     register,
-    control,
     handleSubmit,
-    trigger,
     watch,
     setValue,
     formState: { errors },
   } = useForm<SkillCategoryInputs>({
+    resolver: zodResolver(skillCategorySchema),
     defaultValues: {
       name: "",
       description: "",
       aboutMeId: "",
     },
-    resolver: zodResolver(skillCategorySchema),
   });
 
-  const { data: aboutMeData, isLoading: aboutMeIsLoading } = useQuery({
-    queryKey: ["about-me"],
+  const { data: homes, isLoading } = useQuery({
+    queryKey: ["homes"],
     queryFn: async () => {
-      const res = await api.get<AboutMeReponse>("/aboutme");
+      const res = await api.get<{
+        data: AboutMe[];
+        meta: {};
+      }>("/aboutme");
       return res.data;
     },
   });
 
-  const { data: skillCategoryData, isLoading: skillCategoryIsLoading } =
-    useQuery({
-      queryKey: ["skill-categories", skillCategoryId],
-      queryFn: async () => {
-        const res = await api.get(`/skill-categories/${skillCategoryId}`);
-        return res.data;
-      },
-      enabled: !!skillCategoryId,
-    });
+  const { data: selectedSkillCategory } = useQuery({
+    queryKey: ["skill-category", skillCategoryId],
+    queryFn: async () => {
+      const res = await api.get(`/skill-category/${skillCategoryId}`);
+      return res.data;
+    },
+    enabled: !!skillCategoryId,
+  });
 
   const createSkillCategoryMutation = useMutation({
+    mutationKey: ["create-skill-category"],
     mutationFn: async (data: SkillCategoryInputs) => {
-      const res = await api.post("/skill-categories", data);
+      const res = await api.post("/skill-category", data);
       return res.data;
     },
     onSuccess: () => {
-      onSuccess?.();
       addToast({
         title: "Categoría de habilidad creada",
         description: "La categoría de habilidad se creó correctamente",
         color: "success",
       });
+      onOpenChange(false);
+      reFetch();
     },
     onError: () => {
       addToast({
-        title: "Error al crear categoría de habilidad",
-        description: "La categoría de habilidad no se creó correctamente",
+        title: "Error al crear la categoría de habilidad",
+        description: "La categoría de habilidad no se pudo crear",
         color: "danger",
       });
     },
   });
 
   const updateSkillCategoryMutation = useMutation({
+    mutationKey: ["update-skill-category"],
     mutationFn: async (data: SkillCategoryInputs) => {
-      const res = await api.patch(`/skill-categories/${skillCategoryId}`, data);
+      const res = await api.patch(`/skill-category/${skillCategoryId}`, data);
       return res.data;
     },
     onSuccess: () => {
-      onSuccess?.();
       addToast({
         title: "Categoría de habilidad actualizada",
         description: "La categoría de habilidad se actualizó correctamente",
         color: "success",
       });
+      onOpenChange(false);
+      reFetch();
     },
     onError: () => {
       addToast({
-        title: "Error al actualizar categoría de habilidad",
-        description: "La categoría de habilidad no se actualizó correctamente",
+        title: "Error al actualizar la categoría de habilidad",
+        description: "La categoría de habilidad no se pudo actualizar",
         color: "danger",
       });
     },
   });
 
   const onSubmit = async (data: SkillCategoryInputs) => {
-    if (skillCategoryId) {
-      updateSkillCategoryMutation.mutate(data);
-    } else {
-      createSkillCategoryMutation.mutate(data);
-      console.log(data);
+    setFormSubmitted(true);
+    try {
+      if (skillCategoryId) {
+        await updateSkillCategoryMutation.mutateAsync(data);
+      } else {
+        await createSkillCategoryMutation.mutateAsync(data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setFormSubmitted(false);
     }
   };
 
   useEffect(() => {
-    if (skillCategoryData) {
-      setValue("name", skillCategoryData.name);
-      setValue("description", skillCategoryData.description);
-      setValue("aboutMeId", skillCategoryData.aboutMeId);
+    if (selectedSkillCategory) {
+      setValue("name", selectedSkillCategory.name);
+      setValue("description", selectedSkillCategory.description);
+      setValue("aboutMeId", selectedSkillCategory.aboutMeId);
     }
-  }, [skillCategoryId, setValue, skillCategoryData]);
+  }, [selectedSkillCategory, setValue]);
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={handleSubmit(onSubmit)}
+      ref={formRef}
+    >
       <Input
-        label="Título"
-        placeholder="Ingrese titulo de la experiencia laboral"
         labelPlacement="outside"
+        size="lg"
+        label="Nombre"
+        placeholder="Ingrese el nombre de la categoría"
         variant="faded"
-        isDisabled={skillCategoryIsLoading}
-        isInvalid={!!errors.name}
-        errorMessage={errors.name?.message}
         value={watch("name")}
         {...register("name")}
       />
       <Textarea
-        label="Descripción"
-        placeholder="Ingrese descripción de la experiencia laboral"
         labelPlacement="outside"
+        size="lg"
+        label="Descripción"
+        placeholder="Ingrese la descripción de la categoría"
         variant="faded"
-        isDisabled={skillCategoryIsLoading}
-        isInvalid={!!errors.description}
-        errorMessage={errors.description?.message}
         value={watch("description")}
         {...register("description")}
       />
-      <Controller
-        name="aboutMeId"
-        control={control}
-        render={({ field }) => (
-          <Select
-            className="w-full"
-            variant="faded"
-            label="Home page"
-            placeholder="Seleccione home page"
-            labelPlacement="outside"
-            isLoading={aboutMeIsLoading}
-            isDisabled={skillCategoryIsLoading}
-            multiple={false}
-            selectedKeys={field.value ? [field.value] : []}
-            isInvalid={!!errors.aboutMeId}
-            errorMessage={errors.aboutMeId?.message}
-            items={aboutMeData?.data || []}
-            onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0]?.toString() || "";
-              field.onChange(selectedKey);
-            }}
-          >
-            {(item) => <SelectItem key={item.id}>{item.title}</SelectItem>}
-          </Select>
-        )}
-      />
+      <Select
+        items={homes?.data || []}
+        labelPlacement="outside"
+        size="lg"
+        label="Pagina de sobre mi"
+        placeholder="Seleccione la pagina de sobre mi"
+        variant="faded"
+        value={watch("aboutMeId")}
+        {...register("aboutMeId")}
+      >
+        {(item) => <SelectItem key={item.id}>{item.title}</SelectItem>}
+      </Select>
     </form>
   );
-});
-
-export default SkillCategoryForm;
+}

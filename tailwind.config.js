@@ -123,7 +123,7 @@ export default {
               foreground: "#000",
             },
             focus: "#ffeb3b",
-            overlay: "#000000",
+            overlay: "#f7f7f7",
           },
         },
         dark: {
@@ -231,7 +231,7 @@ export default {
               foreground: "#fff",
             },
             focus: "#ffeb3b",
-            overlay: "#ffffff",
+            overlay: "#181818",
           },
         },
       },

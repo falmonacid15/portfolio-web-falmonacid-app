@@ -160,12 +160,25 @@ export function DataTable<T extends BaseRow>({
         </div>
       );
     }
+    if (columnKey === "icon") {
+      return <Icon icon={item.icon as string} className="w-6 h-6" />;
+    }
     if (columnKey === "image") {
       return (
         <Avatar
           alt="image"
           radius={squareImages ? "sm" : "full"}
           src={item.image as string}
+          size="lg"
+        />
+      );
+    }
+    if (columnKey === "mainImage") {
+      return (
+        <Avatar
+          alt="image"
+          radius={squareImages ? "sm" : "full"}
+          src={item.mainImage as string}
           size="lg"
         />
       );

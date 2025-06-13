@@ -1,61 +1,77 @@
 import {
-  Button,
   Modal,
-  ModalBody,
   ModalContent,
-  ModalFooter,
   ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
 } from "@heroui/react";
-import { cloneElement, useRef, useState } from "react";
+import { ReactNode } from "react";
+import useFormStore from "../../../store/formStore";
 
 interface FormModalProps {
+  title: string;
+  children: ReactNode;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  title: string;
-  children: React.ReactNode;
+  formRef: React.RefObject<HTMLFormElement | null>;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
 }
 
 export default function FormModal({
   title,
+  children,
   isOpen,
   onOpenChange,
-  children,
+  formRef,
+  size = "md",
 }: FormModalProps) {
-  const formRef = useRef<{ submit: () => Promise<boolean> }>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { formSubmitted } = useFormStore();
 
-  const handleSubmit = async () => {
-    if (formRef.current) {
-      setIsSubmitting(true);
-      try {
-        await formRef.current.submit();
-      } finally {
-        setIsSubmitting(false);
-      }
+  const handleSave = () => {
+    if (formRef?.current) {
+      const submitEvent = new Event("submit", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      });
+      formRef.current.dispatchEvent(submitEvent);
     }
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      backdrop="blur"
-      size="4xl"
+      onOpenChange={(open) => {
+        if (!formSubmitted) {
+          onOpenChange(open);
+        }
+      }}
+      size={size}
       scrollBehavior="inside"
+      isDismissable={!formSubmitted}
     >
       <ModalContent>
-        <ModalHeader>{title}</ModalHeader>
-        <ModalBody>
-          {cloneElement(children as React.ReactElement, { ref: formRef })}
-        </ModalBody>
-        <ModalFooter className="flex justify-center">
-          <Button color="danger" onClick={() => onOpenChange(false)}>
+        <ModalHeader className="justify-center">
+          <h1 className="text-lg font-bold">{title}</h1>
+        </ModalHeader>
+        <ModalBody>{children}</ModalBody>
+        <ModalFooter>
+          <Button
+            color="danger"
+            onPress={handleClose}
+            isDisabled={formSubmitted}
+          >
             Cerrar
           </Button>
           <Button
-            isLoading={isSubmitting}
             color="primary"
-            onClick={handleSubmit}
+            isLoading={formSubmitted}
+            onPress={handleSave}
           >
             Guardar
           </Button>

@@ -1,3 +1,10 @@
+import { RefObject, useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  CreateProjectInput,
+  createProjectSchema,
+} from "../../schemas/ProjectSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   addToast,
   Input,
@@ -8,86 +15,88 @@ import {
   Textarea,
 } from "@heroui/react";
 import { DynamicTextInput } from "../ui/DynamicTextInput";
-import { Controller, useForm } from "react-hook-form";
-import { forwardRef, useImperativeHandle, useState } from "react";
 import { ImageDropzone } from "../ui/ImageDropzone";
-import {
-  CreateProjectInput,
-  createProjectSchema,
-} from "../../schemas/ProjectSchema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../lib/axios";
 import { Home } from "../../interfaces/models/Home";
 import { Portfolio } from "../../interfaces/models/Portfolio";
-import { zodResolver } from "@hookform/resolvers/zod";
+import useFormStore from "../../store/formStore";
+import { Project } from "../../interfaces/models/Project";
 
 interface ProjectFormProps {
-  onSuccess?: () => void;
-  projectId?: string;
+  projectId: string | null;
+  onOpenChange: (open: boolean) => void;
+  formRef: RefObject<HTMLFormElement | null>;
+  reFetch: () => void;
 }
 
-const ProjectForm = forwardRef<
-  { submit: () => Promise<boolean> },
-  ProjectFormProps
->(({ onSuccess, projectId }, ref) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function ProjectForm({
+  projectId,
+  onOpenChange,
+  formRef,
+  reFetch,
+}: ProjectFormProps) {
+  const { setFormSubmitted } = useFormStore();
 
   const {
-    control,
     register,
-    handleSubmit,
+    control,
     watch,
+    handleSubmit,
     setValue,
     formState: { errors },
-    trigger,
   } = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       name: "",
       shortDescription: "",
-      longDescription: "",
-      portfolioId: "",
-      hasDemo: false,
-      hasRepo: false,
+      mainImage: "",
       isFeatured: false,
-      repositoryUrl: "",
+      hasRepo: false,
       demoUrl: "",
-      languages: [],
-      techonologies: [],
+      hasDemo: false,
       homeId: "",
-      mainImage: undefined,
       images: [],
       isActive: true,
+      languages: [],
+      longDescription: "",
+      portfolioId: "",
+      repositoryUrl: "",
+      technologies: [],
     },
   });
-  useImperativeHandle(ref, () => ({
-    submit: async () => {
-      const isValid = await trigger();
-      if (isValid) {
-        return handleSubmit(onSubmit)();
-      }
-      console.log("Form validation failed", errors);
-      return false;
-    },
-  }));
 
-  const isFeatured = watch("isFeatured", false);
-  const hasRepo = watch("hasRepo", false);
-  const hasDemo = watch("hasDemo", false);
-
-  // get portfolios/homes from api
-  const { data: portfolios } = useQuery({
-    queryKey: ["portfolios"],
+  const { data: selectedProject } = useQuery({
+    queryKey: ["project", projectId],
     queryFn: async () => {
-      const res = await api.get<Portfolio[]>("/portfolio");
+      const res = await api.get<Project>(`/projects/${projectId}`);
+      return res.data;
+    },
+    enabled: !!projectId,
+  });
+
+  const { data: home } = useQuery({
+    queryKey: ["homes"],
+    queryFn: async () => {
+      const res = await api.get<{
+        data: Home[];
+        meta: {
+          totalCount: number;
+        };
+      }>("/home");
       return res.data;
     },
   });
 
-  const { data: homes } = useQuery({
-    queryKey: ["homes"],
+  const { data: portfolio } = useQuery({
+    queryKey: ["portfolios"],
     queryFn: async () => {
-      const res = await api.get<Home[]>("/home");
+      const res = await api.get<{
+        data: Portfolio[];
+        meta: {
+          totalCount: number;
+        };
+      }>("/portfolio");
       return res.data;
     },
   });
@@ -100,24 +109,37 @@ const ProjectForm = forwardRef<
       formData.append("name", data.name);
       formData.append("shortDescription", data.shortDescription);
       formData.append("longDescription", data.longDescription);
-      formData.append("portfolioId", data.portfolioId);
-      formData.append("hasDemo", data.hasDemo.toString());
-      formData.append("hasRepo", data.hasRepo.toString());
-      formData.append("isFeatured", data.isFeatured.toString());
-      formData.append("repositoryUrl", data.repositoryUrl);
-      formData.append("demoUrl", data.demoUrl);
-      formData.append("languages", data.languages.join(","));
-      formData.append("techonologies", data.techonologies.join(","));
-      formData.append("homeId", data.homeId as string);
       formData.append("isActive", data.isActive.toString());
-      formData.append("mainImage", data.mainImage as File);
-      formData.append("images", data.images as File[]);
+      formData.append("portfolioId", data.portfolioId);
+      formData.append("isFeatured", data.isFeatured.toString());
+      formData.append("hasRepo", data.hasRepo.toString());
+      formData.append("hasDemo", data.hasDemo.toString());
+      formData.append("demoUrl", data.demoUrl || "");
+      formData.append("repositoryUrl", data.repositoryUrl || "");
+      if (data.homeId) {
+        formData.append("homeId", data.homeId);
+      }
 
-      const res = await api.post<CreateProjectInput>("/projects", formData, {
+      formData.append("mainImage", data.mainImage);
+
+      Array.from(data.images).forEach((file: any) => {
+        formData.append("images", file);
+      });
+
+      data.technologies.forEach((tech: string) => {
+        formData.append("technologies", tech);
+      });
+
+      data.languages.forEach((lang: string) => {
+        formData.append("languages", lang);
+      });
+
+      const res = await api.post("/projects", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+
       return res.data;
     },
     onSuccess: () => {
@@ -126,251 +148,285 @@ const ProjectForm = forwardRef<
         description: "El proyecto se creo correctamente",
         color: "success",
       });
+      reFetch();
+      onOpenChange(false);
+    },
+    onError: () => {
+      addToast({
+        title: "Error",
+        description: "Hubo un error al crear el proyecto",
+        color: "danger",
+      });
+    },
+  });
+
+  const updateProjectMutation = useMutation({
+    mutationKey: ["updateProject"],
+    mutationFn: async (data: CreateProjectInput) => {
+      const formData = new FormData();
+
+      formData.append("name", data.name);
+      formData.append("shortDescription", data.shortDescription);
+      formData.append("longDescription", data.longDescription);
+      formData.append("isActive", data.isActive.toString());
+      formData.append("portfolioId", data.portfolioId);
+      formData.append("isFeatured", data.isFeatured.toString());
+      formData.append("hasRepo", data.hasRepo.toString());
+      formData.append("hasDemo", data.hasDemo.toString());
+      formData.append("demoUrl", data.demoUrl || "");
+      formData.append("repositoryUrl", data.repositoryUrl || "");
+      if (data.homeId) {
+        formData.append("homeId", data.homeId);
+      }
+
+      if (data.mainImage instanceof File) {
+        formData.append("mainImage", data.mainImage);
+      }
+
+      if (data.images instanceof Array) {
+        Array.from(data.images).forEach((file: any) => {
+          formData.append("images", file);
+        });
+      }
+
+      data.technologies.forEach((tech: string) => {
+        formData.append("technologies", tech);
+      });
+
+      data.languages.forEach((lang: string) => {
+        formData.append("languages", lang);
+      });
+
+      const res = await api.patch(`/projects/${projectId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return res.data;
     },
   });
 
   const onSubmit = async (data: CreateProjectInput) => {
+    setFormSubmitted(true);
+    console.log(data);
     try {
-      setIsSubmitting(true);
-
       if (projectId) {
-        // Update existing project
-        console.log("Updating project", data);
+        await updateProjectMutation.mutateAsync(data);
       } else {
-        // Create new project
-        console.log("Creating project", data);
-        createProjectMutation.mutate(data); // Assuming you have a mutation for creating a projec
+        await createProjectMutation.mutateAsync(data);
       }
-
-      if (onSuccess) {
-        onSuccess();
-      }
-
-      return true;
     } catch (error) {
-      console.error("Error saving project:", error);
-      return false;
+      console.log(error);
     } finally {
-      setIsSubmitting(false);
+      setFormSubmitted(false);
     }
   };
 
+  useEffect(() => {
+    if (selectedProject) {
+      setValue("name", selectedProject.name);
+      setValue("shortDescription", selectedProject?.shortDescription || "");
+      setValue("longDescription", selectedProject?.longDescription || "");
+      setValue("isActive", selectedProject.isActive);
+      setValue("portfolioId", selectedProject.portfolioId);
+      setValue("isFeatured", selectedProject.isFeatured);
+      setValue("hasRepo", selectedProject.hasRepo);
+      setValue("hasDemo", selectedProject.hasDemo);
+      setValue("demoUrl", selectedProject?.demoUrl || "");
+      setValue("repositoryUrl", selectedProject?.repositoryUrl || "");
+      setValue("homeId", selectedProject.homeId);
+      setValue("technologies", selectedProject.technologies);
+      setValue("languages", selectedProject.languages);
+    }
+  }, [selectedProject]);
+
   return (
     <form
-      className="flex flex-col space-y-4 p-2"
+      ref={formRef}
+      className="flex gap-4"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="flex space-x-8">
-        <div className="w-full flex flex-col space-y-4">
-          <Input
-            label="Nombre"
-            placeholder="Ingrese el nombre del proyecto"
-            labelPlacement="outside"
-            variant="faded"
-            isInvalid={!!errors.name}
-            errorMessage={errors.name?.message}
-            {...register("name")}
-          />
-          <Textarea
-            label="Descripcion corta"
-            placeholder="Ingrese la descripcion corta del proyecto"
-            labelPlacement="outside"
-            variant="faded"
-            isInvalid={!!errors.shortDescription}
-            errorMessage={errors.shortDescription?.message}
-            minRows={2}
-            {...register("shortDescription")}
-          />
-          <Textarea
-            label="Descripcion larga"
-            placeholder="Ingrese la descripcion larga del proyecto"
-            labelPlacement="outside"
-            variant="faded"
-            isInvalid={!!errors.longDescription}
-            errorMessage={errors.longDescription?.message}
-            minRows={5}
-            {...register("longDescription")}
-          />
-        </div>
-        <div className="w-full flex flex-col space-y-8">
-          <div className="flex ">
-            <Controller
-              name="portfolioId"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  className="w-full"
-                  variant="faded"
-                  label="Portafolio"
-                  placeholder="Seleccione portafolio"
-                  labelPlacement="outside"
-                  isLoading={false}
-                  isDisabled={false}
-                  selectedKeys={field.value ? [field.value] : []}
-                  onSelectionChange={(keys) => {
-                    const selectedKey = Array.from(keys)[0]?.toString() || "";
-                    field.onChange(selectedKey);
-                  }}
-                  isInvalid={!!errors.portfolioId}
-                  errorMessage={errors.portfolioId?.message}
-                >
-                  {portfolios?.map((portfolio) => (
-                    <SelectItem key={portfolio?.id} value={portfolio.id}>
-                      {portfolio.title}
-                    </SelectItem>
-                  ))}
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex ">
-            <Controller
-              name="isFeatured"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  label="Es destacado"
-                  orientation="horizontal"
-                  className="w-[50%]"
-                  isInvalid={!!errors.isFeatured}
-                  errorMessage={errors.isFeatured?.message}
-                  value={field.value ? "active" : "inactive"}
-                  onValueChange={(value) => field.onChange(value === "active")}
-                >
-                  <Radio value="active">Si</Radio>
-                  <Radio value="inactive">No</Radio>
-                </RadioGroup>
-              )}
-            />
-            <Controller
-              name="homeId"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  className="w-full"
-                  isDisabled={!isFeatured}
-                  variant="faded"
-                  label="Home"
-                  placeholder="Seleccione home"
-                  labelPlacement="outside"
-                  selectedKeys={field.value ? [field.value] : []}
-                  onSelectionChange={(keys) => {
-                    const selectedKey = Array.from(keys)[0]?.toString() || "";
-                    field.onChange(selectedKey);
-                  }}
-                  isInvalid={!!errors.homeId}
-                  errorMessage={errors.homeId?.message}
-                >
-                  {homes?.map((home) => (
-                    <SelectItem key={home?.id} value={home.id}>
-                      {home.heroTitle}
-                    </SelectItem>
-                  ))}
-                </Select>
-              )}
-            />
-          </div>
-
-          <div className="flex">
-            <Controller
-              name="hasRepo"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  label="Tiene codigo"
-                  orientation="horizontal"
-                  className="w-[50%]"
-                  isInvalid={!!errors.hasRepo}
-                  errorMessage={errors.hasRepo?.message}
-                  value={field.value ? "active" : "inactive"}
-                  onValueChange={(value) => field.onChange(value === "active")}
-                >
-                  <Radio value="active">Si</Radio>
-                  <Radio value="inactive">No</Radio>
-                </RadioGroup>
-              )}
-            />
-            <Input
-              label="Url del repositorio"
-              placeholder="Ingrese la url del repositorio"
-              labelPlacement="outside"
-              variant="faded"
-              isInvalid={!!errors.repositoryUrl}
-              errorMessage={errors.repositoryUrl?.message}
-              isDisabled={!hasRepo}
-              {...register("repositoryUrl")}
-            />
-          </div>
-          <div className="flex">
-            <Controller
-              name="hasDemo"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  label="Tiene demo"
-                  orientation="horizontal"
-                  className="w-[50%]"
-                  isInvalid={!!errors.hasDemo}
-                  errorMessage={errors.hasDemo?.message}
-                  value={field.value ? "active" : "inactive"}
-                  onValueChange={(value) => field.onChange(value === "active")}
-                >
-                  <Radio value="active">Si</Radio>
-                  <Radio value="inactive">No</Radio>
-                </RadioGroup>
-              )}
-            />
-            <Input
-              label="Url de la demo"
-              placeholder="Ingrese la url de la demo"
-              labelPlacement="outside"
-              variant="faded"
-              isInvalid={!!errors.demoUrl}
-              errorMessage={errors.demoUrl?.message}
-              isDisabled={!hasDemo}
-              {...register("demoUrl")}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="flex space-x-8 w-full">
-        <div className="w-full">
-          <DynamicTextInput
-            name="techonologies"
-            label="Tecnologias"
-            buttonLabel="Agregar tecnologia"
-            inputPlaceholder="Ej: React"
-            register={register}
-            control={control}
-          />
-        </div>
-        <div className="w-full">
-          <DynamicTextInput
-            name="languages"
-            label="Lenguajes"
-            buttonLabel="Agregar lenguaje"
-            inputPlaceholder="Ej: JavaScript"
-            register={register}
-            control={control}
-          />
-        </div>
-      </div>
-      <div className="flex space-x-8 w-full mt-4">
-        <ImageDropzone
+      <div className="flex flex-col gap-4 w-full">
+        <Input
+          labelPlacement="outside"
+          size="lg"
+          label="Nombre"
+          placeholder="Ingrese el nombre del proyecto"
+          variant="faded"
+          value={watch("name")}
+          {...register("name")}
+        />
+        <Textarea
+          labelPlacement="outside"
+          size="lg"
+          label="Descripción corta"
+          placeholder="Ingrese la descripción corta del proyecto"
+          variant="faded"
+          value={watch("shortDescription")}
+          {...register("shortDescription")}
+        />
+        <Textarea
+          labelPlacement="outside"
+          size="lg"
+          label="Descripción larga"
+          placeholder="Ingrese la descripción larga del proyecto"
+          variant="faded"
+          value={watch("longDescription")}
+          {...register("longDescription")}
+        />
+        <Controller
+          name="isActive"
           control={control}
-          name="mainImage"
-          label="Imagen principal"
+          render={({ field }) => (
+            <RadioGroup
+              label="¿Esta activo?"
+              orientation="horizontal"
+              value={field.value ? "true" : "false"}
+              onValueChange={(value) => field.onChange(value === "true")}
+            >
+              <Radio value="true">Si</Radio>
+              <Radio value="false">No</Radio>
+            </RadioGroup>
+          )}
+        />
+        <Select
+          label="Portfolio"
+          labelPlacement="outside"
+          variant="bordered"
+          placeholder="Seleccione un portfolio"
+          items={portfolio?.data || []}
+          className="w-full"
+          isLoading={!portfolio}
+          selectedKeys={[watch("portfolioId") || ""]}
+          {...register("portfolioId")}
+        >
+          {(item) => <SelectItem key={item.id}>{item.title}</SelectItem>}
+        </Select>
+        <div className="flex gap-4 w-full">
+          <Controller
+            name="isFeatured"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                label="¿Es destacado?"
+                orientation="horizontal"
+                className="w-1/2"
+                value={field.value ? "true" : "false"}
+                onValueChange={(value) => field.onChange(value === "true")}
+              >
+                <Radio value="true">Si</Radio>
+                <Radio value="false">No</Radio>
+              </RadioGroup>
+            )}
+          />
+          <Select
+            label="home"
+            labelPlacement="outside"
+            variant="bordered"
+            placeholder="Seleccione una home"
+            selectedKeys={[watch("homeId") || ""]}
+            isDisabled={watch("isFeatured") === false}
+            items={home?.data || []}
+            className="w-full"
+            {...register("homeId")}
+          >
+            {(item) => <SelectItem key={item.id}>{item.heroTitle}</SelectItem>}
+          </Select>
+        </div>
+        <div className="flex gap-4">
+          <Controller
+            name="hasRepo"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                label="¿Tiene repositorio?"
+                orientation="horizontal"
+                className="w-1/2"
+                value={field.value ? "true" : "false"}
+                onValueChange={(value) => field.onChange(value === "true")}
+              >
+                <Radio value="true">Si</Radio>
+                <Radio value="false">No</Radio>
+              </RadioGroup>
+            )}
+          />
+          <Input
+            labelPlacement="outside"
+            size="lg"
+            label="URL repositorio"
+            placeholder="Ingrese la URL del repositorio"
+            variant="faded"
+            className="w-full"
+            value={watch("repositoryUrl")}
+            isDisabled={watch("hasRepo") === false}
+            {...register("repositoryUrl")}
+          />
+        </div>
+        <div className="flex gap-4">
+          <Controller
+            name="hasDemo"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                label="¿Tiene demo?"
+                orientation="horizontal"
+                className="w-1/2"
+                value={field.value ? "true" : "false"}
+                onValueChange={(value) => field.onChange(value === "true")}
+              >
+                <Radio value="true">Si</Radio>
+                <Radio value="false">No</Radio>
+              </RadioGroup>
+            )}
+          />
+          <Input
+            labelPlacement="outside"
+            size="lg"
+            label="URL de la demo"
+            placeholder="Ingrese la URL de la demo"
+            variant="faded"
+            className="w-full"
+            value={watch("demoUrl")}
+            isDisabled={watch("hasDemo") === false}
+            {...register("demoUrl")}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-4 w-full">
+        <DynamicTextInput
+          label="Tecnologías"
+          buttonLabel="Agregar tecnología"
+          typeInput="input"
+          name="technologies"
+          control={control}
+          register={register}
+        />
+        <DynamicTextInput
+          label="Lenguajes"
+          buttonLabel="Agregar lenguaje"
+          typeInput="input"
+          name="languages"
+          control={control}
+          register={register}
         />
         <ImageDropzone
+          key="mainImage"
+          name="mainImage"
           control={control}
+          multiple={false}
+          label="Imagen principal"
+          existingImages={selectedProject?.mainImage}
+        />
+        <ImageDropzone
+          key="images"
           name="images"
-          label="Imagenes galeria"
-          multiple
-          maxFiles={5}
+          control={control}
+          multiple={true}
+          label="Imágenes"
+          existingImages={selectedProject?.images}
         />
       </div>
     </form>
   );
-});
-
-export default ProjectForm;
+}

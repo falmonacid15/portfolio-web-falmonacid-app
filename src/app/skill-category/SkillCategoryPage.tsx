@@ -7,10 +7,10 @@ import FormModal from "../../components/ui/modals/FormModal";
 import SkillCategoryForm from "../../components/forms/SkillCategoryForm";
 import { addToast, useDisclosure } from "@heroui/react";
 import { SkillCategory } from "../../interfaces/models/SkillCategory";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ConfirmModal from "../../components/ui/modals/ConfirmModal";
 
-interface SkillCategoryReponse {
+interface SkillCategoryResponse {
   data: SkillCategory[];
   total: number;
   page: number;
@@ -26,6 +26,8 @@ export default function SkillCategoryPage() {
     string | null
   >(null);
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+
   const skillCategoryDisclosure = useDisclosure();
   const confirmModalDisclosure = useDisclosure();
 
@@ -34,9 +36,11 @@ export default function SkillCategoryPage() {
     isLoading: isLoadingSkillCategories,
     refetch,
   } = useQuery({
-    queryKey: ["skill-categories"],
+    queryKey: ["skill-categories", page],
     queryFn: async () => {
-      const res = await api.get<SkillCategoryReponse>("/skill-categories");
+      const res = await api.get<SkillCategoryResponse>(
+        `/skill-category?page=${page}`
+      );
 
       return res.data;
     },
@@ -45,23 +49,23 @@ export default function SkillCategoryPage() {
   const deleteSkillCategoryMutation = useMutation({
     mutationKey: ["delete-skill-category"],
     mutationFn: async (id: string) => {
-      const res = await api.delete(`/skill-categories/${id}`);
+      const res = await api.delete(`/skill-category/${id}`);
 
       return res.data;
     },
     onSuccess: () => {
       refetch();
       addToast({
-        title: "Categoria de habilidad eliminada",
-        description: "La categoria de habilidad se ha eliminado correctamente",
+        title: "Categoría de habilidad eliminada",
+        description: "La categoría de habilidad se ha eliminado correctamente",
         color: "success",
       });
     },
     onError: () => {
       addToast({
-        title: "Error al eliminar categoria de habilidad",
+        title: "Error al eliminar categoría de habilidad",
         description:
-          "La categoria de habilidad no se ha eliminado correctamente",
+          "La categoría de habilidad no se ha eliminado correctamente",
         color: "danger",
       });
     },
@@ -102,21 +106,21 @@ export default function SkillCategoryPage() {
   return (
     <div>
       <HeaderPage
-        title="Categorias de habilidades"
-        description="Gestiona desde aqui las categorias de habilidades de tu portafolio."
+        title="Categorías de habilidades"
+        description="Gestiona desde aquí las categorías de habilidades de tu portafolio."
       />
       <FormModal
         key="skill-category"
-        title="Nueva categoria de habilidad"
+        title="Nueva categoría de habilidad"
         isOpen={skillCategoryDisclosure.isOpen}
         onOpenChange={skillCategoryDisclosure.onOpenChange}
+        formRef={formRef}
       >
         <SkillCategoryForm
-          onSuccess={() => {
-            skillCategoryDisclosure.onOpenChange();
-            refetch();
-          }}
           skillCategoryId={selectedSkillCategory}
+          onOpenChange={skillCategoryDisclosure.onOpenChange}
+          formRef={formRef}
+          reFetch={refetch}
         />
       </FormModal>
       <ConfirmModal
@@ -138,7 +142,7 @@ export default function SkillCategoryPage() {
           page={page}
           onPageChange={handleChangePage}
           actionButton={handleAddSkillCategory}
-          actionButtonLabel="Nueva categoria de habilidad"
+          actionButtonLabel="Nueva categoría de habilidad"
           onEdit={handleEditSkillCategory}
           onDelete={handleDeleteSkillCategory}
         />

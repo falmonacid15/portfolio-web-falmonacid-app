@@ -6,8 +6,9 @@ import FormModal from "../../components/ui/modals/FormModal";
 import { WorkExperience } from "../../interfaces/models/WorkExperience";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../lib/axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ConfirmModal from "../../components/ui/modals/ConfirmModal";
+import { PaginationMeta } from "../../interfaces/pagination";
 
 const workExperiencesColumns = [
   {
@@ -30,8 +31,7 @@ const workExperiencesColumns = [
 
 interface WorkExperienceResponse {
   data: WorkExperience[];
-  itemsPerPage: number;
-  total: number;
+  meta: PaginationMeta;
 }
 
 export default function WorkExperiencePage() {
@@ -43,6 +43,8 @@ export default function WorkExperiencePage() {
 
   const workExperiencesDisclosure = useDisclosure();
   const confirmModalDisclosure = useDisclosure();
+
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   const handleActionDataTable = () => {
     workExperiencesDisclosure.onOpenChange();
@@ -77,7 +79,9 @@ export default function WorkExperiencePage() {
   } = useQuery({
     queryKey: ["work-experiences", page],
     queryFn: async () => {
-      const res = await api.get<WorkExperienceResponse>("/work-experiences");
+      const res = await api.get<WorkExperienceResponse>(
+        `/work-experience?page=${page}`
+      );
 
       return res.data;
     },
@@ -85,7 +89,7 @@ export default function WorkExperiencePage() {
 
   const deleteWorkExperienceMutation = useMutation({
     mutationFn: async (workExperienceId: string) => {
-      const res = await api.delete(`/work-experiences/${workExperienceId}`);
+      const res = await api.delete(`/work-experience/${workExperienceId}`);
       return res.data;
     },
     onSuccess: () => {
@@ -116,13 +120,13 @@ export default function WorkExperiencePage() {
         title="Nueva experiencia laboral"
         isOpen={workExperiencesDisclosure.isOpen}
         onOpenChange={workExperiencesDisclosure.onOpenChange}
+        formRef={formRef}
       >
         <WorkExperienceForm
-          onSuccess={() => {
-            workExperiencesDisclosure.onOpenChange();
-            refetch();
-          }}
           workExperienceId={selectedWorkExperience}
+          onOpenChange={workExperiencesDisclosure.onOpenChange}
+          formRef={formRef}
+          reFetch={refetch}
         />
       </FormModal>
       <ConfirmModal
@@ -139,8 +143,8 @@ export default function WorkExperiencePage() {
           key="work-experiences"
           columns={workExperiencesColumns}
           rows={workExperiences?.data || []}
-          itemsPerPage={workExperiences?.itemsPerPage || 10}
-          totalCount={workExperiences?.total || 0}
+          itemsPerPage={10}
+          totalCount={workExperiences?.meta.totalCount || 0}
           onPageChange={handleChangePage}
           page={page}
           isLoading={workExperiencesIsLoading}

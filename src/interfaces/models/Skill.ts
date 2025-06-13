@@ -8,4 +8,5 @@ export interface Skill {
   category: SkillCategory;
   createdAt: Date;
   updatedAt: Date;
+  [key: string]: any;
 }
