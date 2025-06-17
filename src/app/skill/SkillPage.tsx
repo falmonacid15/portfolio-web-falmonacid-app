@@ -46,7 +46,7 @@ export default function SkillPage() {
   } = useQuery({
     queryKey: ["skills", page],
     queryFn: async () => {
-      const res = await api.get(`/skill?page=${page}`);
+      const res = await api.get(`/skill?page=${page}&perPage=10`);
       return res.data;
     },
   });
@@ -146,6 +146,9 @@ export default function SkillPage() {
           onEdit={handleEditSkill}
           onDelete={handleDeleteSkill}
           onPageChange={handleChangePage}
+          totalCount={skills?.meta.totalCount || 0}
+          itemsPerPage={10}
+          page={page}
           isLoading={isLoading}
         />
       </div>

@@ -12,9 +12,9 @@ import ConfirmModal from "../../components/ui/modals/ConfirmModal";
 
 interface SkillCategoryResponse {
   data: SkillCategory[];
-  total: number;
-  page: number;
-  limit: number;
+  meta: {
+    totalCount: number;
+  };
 }
 
 export default function SkillCategoryPage() {
@@ -39,7 +39,7 @@ export default function SkillCategoryPage() {
     queryKey: ["skill-categories", page],
     queryFn: async () => {
       const res = await api.get<SkillCategoryResponse>(
-        `/skill-category?page=${page}`
+        `/skill-category?page=${page}&perPage=10`
       );
 
       return res.data;
@@ -137,8 +137,8 @@ export default function SkillCategoryPage() {
           key="skill-category-table"
           columns={skillCategoriesColumns}
           rows={skillCategories?.data || []}
-          itemsPerPage={skillCategories?.limit || 0}
-          totalCount={skillCategories?.total || 0}
+          itemsPerPage={10}
+          totalCount={skillCategories?.meta.totalCount || 0}
           page={page}
           onPageChange={handleChangePage}
           actionButton={handleAddSkillCategory}

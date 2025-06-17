@@ -65,7 +65,7 @@ export default function ProjectsPage() {
       const res = await api.get<{
         data: Project[];
         meta: PaginationMeta;
-      }>(`/projects?page=${page}`);
+      }>(`/projects?page=${page}&perPage=10`);
       return res.data;
     },
   });
